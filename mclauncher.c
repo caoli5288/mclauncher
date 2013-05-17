@@ -4,8 +4,6 @@
 
 void initgame(gpointer player)
 {
-  chdir("./bin");
-	g_print("%s\n",getcwd(NULL,0));
 	char com[200] = "java -cp ";
 	strcat(com,"jinput.jar:lwjgl.jar:lwjgl_util.jar:minecraft.jar ");
 	strcat(com,"-Djava.library.path=\"./natives\" ");
@@ -45,8 +43,14 @@ void startgame(GtkWidget *button,gpointer bufferplayer)
 	
 	g_print("%s\n",player);
 	
-	initgame(bufferplayer);
+	if(chdir("./bin") != 0)
+		initpointdownwin();
+	else
+	{
+		g_print("%s\n",getcwd(NULL,0));
+		initgame(bufferplayer);
 	}
+}
 
 void findgame()
 {
@@ -55,10 +59,8 @@ void findgame()
 		char path[200]="";
 		strcat(path,getenv("HOME"));
 		strcat(path,"/.minecraft");
-		if(chdir(path) != 0 )
-			initpointdownwin();
-		else
-				g_print("%s\n",getcwd(NULL,0));
+		chdir(path);
+		g_print("%s\n",getcwd(NULL,0));
 			}
 	else
 			g_print("%s\n",getcwd(NULL,0));
