@@ -43,14 +43,10 @@ void startgame(GtkWidget *button,gpointer bufferplayer)
 	
 	g_print("%s\n",player);
 	
-	if(chdir("./bin") != 0)
-		initpointdownwin();
-	else
-	{
-		g_print("%s\n",getcwd(NULL,0));
-		initgame(bufferplayer);
+	chdir("./bin");
+	g_print("%s\n",getcwd(NULL,0));
+	initgame(bufferplayer);
 	}
-}
 
 void findgame()
 {
@@ -59,13 +55,16 @@ void findgame()
 		char path[200]="";
 		strcat(path,getenv("HOME"));
 		strcat(path,"/.minecraft");
-		chdir(path);
-		g_print("%s\n",getcwd(NULL,0));
+		if(chdir(path) != 0 )
+		{
+			initpointdownwin();
+			g_print("%s\n",getcwd(NULL,0));
 			}
 	else
 			g_print("%s\n",getcwd(NULL,0));
 	}
-	
+}
+
 void initmainwin()
 {
 	char player[80] = "";
