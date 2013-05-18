@@ -1,20 +1,21 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
 #include <string.h>
+//#include <direct.h>
+#include <unistd.h>
 
-GtkWidget *window1;
-
-void initgame(gpointer player)
+void initgame(char *player)
 {
 	char com[200] = "java -cp ";
 	strcat(com,"jinput.jar:lwjgl.jar:lwjgl_util.jar:minecraft.jar ");
 	strcat(com,"-Djava.library.path=\"./natives\" ");
 	strcat(com,"net.minecraft.client.Minecraft ");
-	strcat(com,gtk_entry_buffer_get_text(player));
+	strcat(com,player);
+	
 	g_print("\n%s",com);
-	//execl ("/bin/bash", "bash", "-c", com, NULL);
-	system(com);
-	//gtk_main_quit();
+	
+	execl ("/bin/bash", "bash", "-c", com, NULL);
+	//execlp("javaws","javaws","-cp","/jinput.jar;lwjgl.jar;lwjgl_util.jar;minecraft.jar","-Djava.library.path=\"./natives\"","net.minecraft.client.Minecraft",player,NULL);
 	}
 	
 void initsetwin()
@@ -47,7 +48,7 @@ void startgame(GtkWidget *button,gpointer bufferplayer)
 	
 	chdir("./bin");
 	g_print("%s\n",getcwd(NULL,0));
-	initgame(bufferplayer);
+	initgame(player);
 	}
 
 void findgamelinux()
@@ -73,7 +74,7 @@ void initmainwin()
 {
 	char player[80] = "";
 	FILE *pconf;
-	//GtkWidget *window1;
+	GtkWidget *window1;
 	GtkWidget *vbox1,*vbox2,*hbox1,*hbox2;
 	GtkWidget *image1;
 	GtkWidget *label1;
