@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+GtkWidget *window1;
+
 void initgame(gpointer player)
 {
 	char com[200] = "java -cp ";
@@ -48,28 +50,30 @@ void startgame(GtkWidget *button,gpointer bufferplayer)
 	initgame(bufferplayer);
 	}
 
-void findgame()
+void findgamelinux()
 {
-	if(chdir("./.minecraft") != 0 )
-		{
-		char path[200]="";
-		strcat(path,getenv("HOME"));
-		strcat(path,"/.minecraft");
-		if(chdir(path) != 0 )
-		{
+	char path[200]="";
+	strcat(path,getenv("HOME"));
+	strcat(path,"/.minecraft");
+	if(chdir(path) != 0 )
 			initpointdownwin();
-			g_print("%s\n",getcwd(NULL,0));
-			}
 	else
 			g_print("%s\n",getcwd(NULL,0));
 	}
-}
+
+void findgamems()
+{
+	if(chdir("./.minecraft") != 0 )
+		initpointdownwin();
+	else
+		g_print("%s\n",getcwd(NULL,0));
+	}
 
 void initmainwin()
 {
 	char player[80] = "";
 	FILE *pconf;
-	GtkWidget *window1;
+	//GtkWidget *window1;
 	GtkWidget *vbox1,*vbox2,*hbox1,*hbox2;
 	GtkWidget *image1;
 	GtkWidget *label1;
@@ -101,7 +105,8 @@ void initmainwin()
 	hbox1 = gtk_hbox_new(FALSE,1);
 	gtk_box_pack_start(GTK_BOX(vbox2),hbox1,FALSE,FALSE,0);	
 	
-	findgame();
+	findgamelinux();
+	//findgamems();
 	
 	pconf = fopen("player.conf","a+");
 	fgets(player,80,pconf);
@@ -110,7 +115,6 @@ void initmainwin()
 	g_print("%s\n",player);
 	
 	bufferplayer = gtk_entry_buffer_new(player,-1);
-	//gtk_entry_buffer_set_text(GTK_ENTRY_BUFFER(bufferplayer),player,-1);	
 	
 	entryplayer = gtk_entry_new_with_buffer(GTK_ENTRY_BUFFER(bufferplayer));
 	gtk_box_pack_start(GTK_BOX(hbox1),entryplayer,TRUE,TRUE,60);
