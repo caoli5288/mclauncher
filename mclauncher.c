@@ -21,7 +21,7 @@
 #include <string.h>
 #include <unistd.h>
 
-void initgamelinux(char *player)
+void init_game_linux(char *player)
 {
 	char com[200] = "java -Xms512m -Xmx1g -cp ";
 	strcat(com,"jinput.jar:lwjgl.jar:lwjgl_util.jar:minecraft.jar ");
@@ -34,27 +34,32 @@ void initgamelinux(char *player)
 	execl ("/bin/bash", "bash", "-c", com, NULL);
 	}
 	
-void initgamems(char *player)
+void init_game_ms(char *player)
 {
 	execlp("javaw","javaw","-cp","/jinput.jar;lwjgl.jar;lwjgl_util.jar;minecraft.jar","-Djava.library.path=\"./natives\"","net.minecraft.client.Minecraft",player,NULL);
 	}
 	
-void initsetwin()
+void set_conf_win()
 {
 	
 	}
 	
-void initpointdownwin()
+void point_down_pop()
 {
 
 	}
 	
-void setconf(GtkWidget *button,gpointer userdata)
+void gsign_set_conf(GtkWidget *button,gpointer userdata)
 {
-	initsetwin();
+	set_conf_win();
+	}
+	
+void gsign_chose_game_path(GtkWidget *button,gpointer userdata)
+{
+	
 	}
 
-void startgame(GtkWidget *button,gpointer bufferplayer)
+void gsign_start_game(GtkWidget *button,gpointer bufferplayer)
 {
 	FILE *pconf;
 	char player[80] = "";
@@ -70,30 +75,89 @@ void startgame(GtkWidget *button,gpointer bufferplayer)
 	chdir("./bin");
 	g_print("%s\n",getcwd(NULL,0));
 	
-	//initgamelinux(player);
-	initgamems(player);
+	init_game_linux(player);                           //用于linux
+	init_game_ms(player);                                 //用于windows
 	}
 
-void findgamelinux()
+void chose_game_path_win()
+{
+	
+	}
+
+void no_game_pop()
+{
+	GtkWidget *window1;
+	GtkWidget *vbox1;
+	GtkWidget *hbox1;
+	GtkWidget *label1;
+	GtkWidget *button1,*button2;
+	gchar *words;
+	
+	window1 = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(window1),"Yiwan's craft Launcher");
+	gtk_window_set_default_size(GTK_WINDOW(window1),400,150);
+	gtk_widget_set_size_request (window1, 400, 150);
+	//gtk_window_set_resizable(GTK_WINDOW(window1),FALSE);
+	gtk_window_set_position(GTK_WINDOW(window1),GTK_WIN_POS_CENTER);
+	gtk_container_set_border_width(GTK_CONTAINER(window1),20);
+	g_signal_connect(G_OBJECT(window1),"delete_event",G_CALLBACK(gtk_main_quit),NULL);
+	
+	vbox1 = gtk_vbox_new(FALSE,2);
+	gtk_container_add(GTK_CONTAINER(window1),vbox1);
+	
+	words = "<i><big>在用户目录下找不到游戏文件夹!\n请选择一个包含有.minecraft文件夹的路径!\n单击退出程序以结束。</big></i>";
+	label1 = gtk_label_new(NULL);
+	gtk_label_set_markup(GTK_LABEL(label1),words);
+	gtk_box_pack_start(GTK_BOX(vbox1),label1,FALSE,FALSE,0);
+	
+	hbox1 = gtk_hbox_new(TRUE,2);
+	
+	gtk_box_pack_end(GTK_BOX(vbox1),hbox1,FALSE,TRUE,0);
+	
+	button1 = gtk_button_new_with_label("设置路径");
+	button2 = gtk_button_new_with_label("退出程序");
+	
+	//g_signal_connect(G_OBJECT(button1),"clicked",G_CALLBACK(gsign_chose_game_path),NULL);
+	g_signal_connect(G_OBJECT(button2),"clicked",G_CALLBACK(gtk_main_quit),NULL);
+	
+	gtk_box_pack_start(GTK_BOX(hbox1),button1,FALSE,FALSE,0);
+	gtk_box_pack_start(GTK_BOX(hbox1),button2,FALSE,FALSE,0);
+	
+	gtk_widget_show_all(window1);
+
+	//gtk_main();
+	gtk_main_quit();
+	}
+
+int find_game_linux()
 {
 	char path[200]="";
 	strcat(path,getenv("HOME"));
 	strcat(path,"/.minecraft");
 	if(chdir(path) != 0 )
-			initpointdownwin();
+	{
+		no_game_pop();
+		return -1;
+			}
 	else
 			g_print("%s\n",getcwd(NULL,0));
+	
+	return 0;
 	}
 
-void findgamems()
+int find_game_ms()
 {
 	if(chdir("./.minecraft") != 0 )
-		initpointdownwin();
+		{	no_game_pop();
+			return -1;
+		}
 	else
 		g_print("%s\n",getcwd(NULL,0));
+	
+	return 0;
 	}
 
-void initmainwin()
+void main_win()
 {
 	char player[80] = "";
 	FILE *pconf;
@@ -129,8 +193,9 @@ void initmainwin()
 	hbox1 = gtk_hbox_new(FALSE,1);
 	gtk_box_pack_start(GTK_BOX(vbox2),hbox1,FALSE,FALSE,0);	
 	
-	//findgamelinux();
-	findgamems();
+	if(find_game_linux() != 0 )                          //用于windows
+	//if(find_game_ms() != 0 )                                //用于linux
+	return;
 	
 	pconf = fopen("player.conf","a+");
 	fgets(player,80,pconf);
@@ -149,8 +214,8 @@ void initmainwin()
 	button1 = gtk_button_new_with_label("设置选项");
 	button2 = gtk_button_new_with_label("启动游戏");
 	
-	g_signal_connect(G_OBJECT(button1),"clicked",G_CALLBACK(setconf),NULL);
-	g_signal_connect(G_OBJECT(button2),"clicked",G_CALLBACK(startgame),bufferplayer);
+	g_signal_connect(G_OBJECT(button1),"clicked",G_CALLBACK(gsign_set_conf),NULL);
+	g_signal_connect(G_OBJECT(button2),"clicked",G_CALLBACK(gsign_start_game),bufferplayer);
 	
 	gtk_box_pack_start(GTK_BOX(hbox2),button1,FALSE,FALSE,0);
 	gtk_box_pack_start(GTK_BOX(hbox2),button2,FALSE,FALSE,0);
@@ -161,7 +226,7 @@ void initmainwin()
 int main(int argc, char **argv)
 {	
 	gtk_init(&argc,&argv);
-	initmainwin();
+	main_win();
 	gtk_main();
 	
 	return 0;
