@@ -4,9 +4,9 @@
 //#include <direct.h>
 #include <unistd.h>
 
-void initgame(char *player)
+void initgamelinux(char *player)
 {
-	char com[200] = "java -cp ";
+	char com[200] = "java -Xms512m -Xmx1g -cp ";
 	strcat(com,"jinput.jar:lwjgl.jar:lwjgl_util.jar:minecraft.jar ");
 	strcat(com,"-Djava.library.path=\"./natives\" ");
 	strcat(com,"net.minecraft.client.Minecraft ");
@@ -15,7 +15,11 @@ void initgame(char *player)
 	g_print("\n%s",com);
 	
 	execl ("/bin/bash", "bash", "-c", com, NULL);
-	//execlp("javaws","javaws","-cp","/jinput.jar;lwjgl.jar;lwjgl_util.jar;minecraft.jar","-Djava.library.path=\"./natives\"","net.minecraft.client.Minecraft",player,NULL);
+	}
+	
+void initgamems(char *player)
+{
+	execlp("javaw","javaw","-cp","/jinput.jar;lwjgl.jar;lwjgl_util.jar;minecraft.jar","-Djava.library.path=\"./natives\"","net.minecraft.client.Minecraft",player,NULL);
 	}
 	
 void initsetwin()
@@ -48,7 +52,9 @@ void startgame(GtkWidget *button,gpointer bufferplayer)
 	
 	chdir("./bin");
 	g_print("%s\n",getcwd(NULL,0));
-	initgame(player);
+	
+	initgamelinux(player);
+	//initgamems(player);
 	}
 
 void findgamelinux()
