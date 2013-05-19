@@ -76,7 +76,7 @@ void gsign_start_game(GtkWidget *button,gpointer bufferplayer)
 	g_print("%s\n",getcwd(NULL,0));
 	
 	init_game_linux(player);                           //用于linux
-	init_game_ms(player);                                 //用于windows
+	//init_game_ms(player);                                 //用于windows
 	}
 
 void chose_game_path_win()
@@ -193,8 +193,8 @@ void main_win()
 	hbox1 = gtk_hbox_new(FALSE,1);
 	gtk_box_pack_start(GTK_BOX(vbox2),hbox1,FALSE,FALSE,0);	
 	
-	if(find_game_linux() != 0 )                          //用于windows
-	//if(find_game_ms() != 0 )                                //用于linux
+	if(find_game_linux() != 0 )                          //用于linux
+	//if(find_game_ms() != 0 )                                //用于windows
 	return;
 	
 	pconf = fopen("player.conf","a+");
