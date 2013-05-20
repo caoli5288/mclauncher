@@ -54,8 +54,7 @@ void init_game(gchar *player)
 void gsign_open_home(GtkWidget *button,gpointer userdata)
 {
 	g_print("open home page\n");
-	execlp("firefox","firefox","http://mc.yiraft.tk",NULL);			//用于linux
-	//execl("start","start","iexplore",NULL);													//用于windows
+	execlp("firefox","firefox","http://mc.yiraft.tk",NULL);
 	}
 
 
@@ -69,8 +68,7 @@ void gsign_start_game(GtkWidget *button,gpointer player_buffer)
 	chdir(".minecraft/bin");
 	g_print("dir now:%s\n",getcwd(NULL,0));
 	
-	init_game(player);                           //用于linux
-	//init_game_ms(player);                                 //用于windows
+	init_game(player); 
 	}
 
 void win_erro(GtkWidget *window)
