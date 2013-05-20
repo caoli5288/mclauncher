@@ -40,21 +40,16 @@ void conf_player_save(gchar *player)
 
 void init_game(gchar *player)
 {
-	char com[200] = "java -Xms512m -Xmx1g -cp ";
-	strcat(com,"jinput.jar:lwjgl.jar:lwjgl_util.jar:minecraft.jar ");
-	strcat(com,"-Djava.library.path=\"./natives\" ");
-	strcat(com,"net.minecraft.client.Minecraft ");
-	strcat(com,player);
+	chdir(".minecraft/bin");
+	g_print("dir now:%s\n",getcwd(NULL,0));
 	
-	g_print("init command:%s\n",com);
-	
-	execlp ("bash", "bash", "-c", com, NULL);
+	execlp ("javaw", "javaw", "-Xms512m","-Xmx1g", "-cp","jinput.jar;lwjgl.jar;lwjgl_util.jar;minecraft.jar","-Djava.library.path=\"./natives\"","net.minecraft.client.Minecraft",player,NULL);
 	}
 	
 void gsign_open_home(GtkWidget *button,gpointer userdata)
 {
 	g_print("open home page\n");
-	execlp("firefox","firefox","http://mc.yiraft.tk",NULL);
+	execl("C:/Program Files/Internet Explorer/iexplore","iexplore","http://mc.yiraft.tk",NULL);
 	}
 
 
@@ -64,9 +59,6 @@ void gsign_start_game(GtkWidget *button,gpointer player_buffer)
 	
 	strcat(player,gtk_entry_buffer_get_text(player_buffer));
 	conf_player_save(player);
-	
-	chdir(".minecraft/bin");
-	g_print("dir now:%s\n",getcwd(NULL,0));
 	
 	init_game(player); 
 	}
@@ -161,7 +153,7 @@ void win_main(GtkWidget *window)
 	
 void conf_env_set(gchar *gamepath)
 {
-	gchar env[200] = "HOME = " ;
+	gchar env[200] = "APPDATA=" ;
 	
 	g_print("now set HOME\n");
 	
@@ -170,9 +162,9 @@ void conf_env_set(gchar *gamepath)
 		g_print("set HOME failed\n");
 	else
 		g_print("set HOME succes\n");
-	g_print("now HOME is:%s\n",getenv("HOME"));
+	g_print("now HOME is:%s\n",getenv("APPDATA"));
 	
-	chdir(getenv("HOME"));
+	chdir(getenv("APPDATA"));
 	}
 	
 int main(int argc, char **argv)
@@ -185,7 +177,8 @@ int main(int argc, char **argv)
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	
 	//XXXXXXXXX												//从配置中读取默认目录
-	strcat(gamepath,getenv("HOME"));			//读配置做好后注释掉
+	strcat(gamepath,getcwd(NULL,0));			//读配置做好后注释掉
+	g_print("load game path:%s\n",gamepath);
 	
 	//if(find_game(window,gamepath))				//从目录中查找游戏文件
 	//win_def_dir_set(window);							//配置读写完成后启用，循环检查。
