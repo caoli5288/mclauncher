@@ -48,6 +48,9 @@ void init_game(gchar *player)
 	
 	g_print("init command:%s\n",com);
 	
+	chdir(".minecraft/bin");
+	g_print("dir now:%s\n",getcwd(NULL,0));
+	
 	execlp ("bash", "bash", "-c", com, NULL);
 	}
 	
@@ -64,9 +67,6 @@ void gsign_start_game(GtkWidget *button,gpointer player_buffer)
 	
 	strcat(player,gtk_entry_buffer_get_text(player_buffer));
 	conf_player_save(player);
-	
-	chdir(".minecraft/bin");
-	g_print("dir now:%s\n",getcwd(NULL,0));
 	
 	init_game(player); 
 	}
@@ -85,7 +85,9 @@ int find_game(gchar *gamepath)
 {
 	gchar gamefile[200] = "" ;
 	
+	g_print("exec at:%s\n",getcwd(NULL,0));
 	g_print("now check game file\n");
+	g_print("check game file at:%s\n",gamepath);
 	
 	strcat(gamefile,gamepath);
 	strcat(gamefile,"/.minecraft/bin/minecraft.jar");
@@ -161,9 +163,10 @@ void win_main(GtkWidget *window)
 	
 void conf_env_set(gchar *gamepath)
 {
-	gchar env[200] = "HOME = " ;
+	gchar env[200] = "HOME=" ;
 	
 	g_print("now set HOME\n");
+	g_print("set HOME at:%s\n",gamepath);
 	
 	strcat(env,gamepath);
 	if(putenv(env))
