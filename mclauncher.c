@@ -21,24 +21,24 @@
 #include <string.h>
 #include <unistd.h>
 
-void player_load(gchar *player)
+void conf_player_load(gchar *player)
 {
 	FILE *pconf;
-	pconf = fopen("player.conf","a+");
+	pconf = fopen(".minecraft/player.conf","a+");
 	fgets(player,80,pconf);
 	fclose(pconf);
 }
 
-void player_save(gchar *player)
+void conf_player_save(gchar *player)
 {
 	FILE *pconf;
-	pconf = fopen("player.conf","w+");	
+	pconf = fopen(".minecraft/player.conf","w+");	
 	fputs(player,pconf);
 	fclose(pconf);
 	g_print("save player.conf complete\n");
 	}
 
-void init_game_linux(gchar *player)
+void init_game(gchar *player)
 {
 	char com[200] = "java -Xms512m -Xmx1g -cp ";
 	strcat(com,"jinput.jar:lwjgl.jar:lwjgl_util.jar:minecraft.jar ");
@@ -46,16 +46,10 @@ void init_game_linux(gchar *player)
 	strcat(com,"net.minecraft.client.Minecraft ");
 	strcat(com,player);
 	
-	g_print("%s\n",com);
+	g_print("init command:%s\n",com);
 	
 	execlp ("bash", "bash", "-c", com, NULL);
 	}
-	
-void init_game_ms(char *player)
-{
-
-	}
-	
 	
 void gsign_open_home(GtkWidget *button,gpointer userdata)
 {
@@ -68,13 +62,14 @@ void gsign_open_home(GtkWidget *button,gpointer userdata)
 void gsign_start_game(GtkWidget *button,gpointer player_buffer)
 {	
 	gchar player[80] = "";
+	
 	strcat(player,gtk_entry_buffer_get_text(player_buffer));
-	player_save(player);
+	conf_player_save(player);
 	
-	chdir("./bin");
-	g_print("%s\n",getcwd(NULL,0));
+	chdir(".minecraft/bin");
+	g_print("dir now:%s\n",getcwd(NULL,0));
 	
-	init_game_linux(player);                           //用于linux
+	init_game(player);                           //用于linux
 	//init_game_ms(player);                                 //用于windows
 	}
 
@@ -88,30 +83,21 @@ void win_erro(GtkWidget *window)
 	gtk_widget_destroy(dialog);
 	}
 
-int find_game_linux(GtkWidget *window)
+int find_game(gchar *gamepath)
 {
 	gchar gamefile[200] = "" ;
 	
-	strcat(gamefile,getenv("HOME"));
+	g_print("now check game file\n");
+	
+	strcat(gamefile,gamepath);
 	strcat(gamefile,"/.minecraft/bin/minecraft.jar");
 	
 	if(access(gamefile,F_OK))
-	{
-		win_erro(window);
-		return -1;
-		}
-	return 0;
-	}
-
-int find_game_ms(GtkWidget *window)
-{
-	if(chdir("./.minecraft") != 0 )
-		{	win_erro(window);
+		{
 			return -1;
-		}
-	else
-		g_print("%s\n",getcwd(NULL,0));
-	
+			g_print("check game file failed\n");
+			}
+	g_print("check game file succes\n");
 	return 0;
 	}
 
@@ -125,7 +111,7 @@ void win_main(GtkWidget *window)
 	GtkEntryBuffer *player_buffer;
 	gchar player[80] = "";
 	
-	player_load(player);
+	g_print("dir when init win_main:%s\n",getcwd(NULL,0));
 	
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(window),"Yiwan's craft Launcher");
@@ -138,7 +124,7 @@ void win_main(GtkWidget *window)
 	vbox1 = gtk_vbox_new(FALSE,2);
 	gtk_container_add(GTK_CONTAINER(window),vbox1);
 	
-	image = gtk_image_new_from_file("mclauncher.png");
+	image = gtk_image_new_from_file(".minecraft/mclauncher.png");
 	gtk_box_pack_start(GTK_BOX(vbox1),image,FALSE,FALSE,0);
 	
 	vbox2 = gtk_vbox_new(FALSE,3);
@@ -149,8 +135,10 @@ void win_main(GtkWidget *window)
 	
 	hbox1 = gtk_hbox_new(FALSE,1);
 	gtk_box_pack_start(GTK_BOX(vbox2),hbox1,FALSE,FALSE,0);	
+	
+	conf_player_load(player);									//读取玩家设置
 		
-	g_print("%s\n",player);
+	g_print("load player:%s\n",player);
 	
 	player_buffer = gtk_entry_buffer_new(player,-1);
 	
@@ -173,16 +161,45 @@ void win_main(GtkWidget *window)
 	gtk_widget_show_all(window);	
 	}
 	
+void conf_env_set(gchar *gamepath)
+{
+	gchar env[200] = "HOME = " ;
+	
+	g_print("now set HOME\n");
+	
+	strcat(env,gamepath);
+	if(putenv(env))
+		g_print("set HOME failed\n");
+	else
+		g_print("set HOME succes\n");
+	g_print("now HOME is:%s\n",getenv("HOME"));
+	
+	chdir(getenv("HOME"));
+	}
+	
 int main(int argc, char **argv)
 {	
 	gtk_init(&argc,&argv);
 	
 	GtkWidget *window;
+	gchar gamepath[200] = "";
+	
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	
-	if(find_game_linux(window))
-	return 0;													//找不到游戏执行的动作。
+	//XXXXXXXXX												//从配置中读取默认目录
+	strcat(gamepath,getenv("HOME"));			//读配置做好后注释掉
+	
+	//if(find_game(window,gamepath))				//从目录中查找游戏文件
+	//win_def_dir_set(window);							//配置读写完成后启用，循环检查。
 
+	if(find_game(gamepath))				//从目录中查找游戏文件
+	{
+		win_erro(window);
+		return 0;
+		}
+	
+	conf_env_set(gamepath);							//配置游戏所需环境变量
+	
 	win_main(window);
 	gtk_main();
 	
