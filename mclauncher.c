@@ -59,8 +59,9 @@ void init_game_ms(char *player)
 	
 void gsign_open_home(GtkWidget *button,gpointer userdata)
 {
-	execlp("firefox","firefox","http://mc.yiraft.tk",NULL);            //用于linux
-	execlp("iexplore","iexplore","http://mc.yiraft.tk",NULL);        //用于windows
+	g_print("open home page\n");
+	execlp("firefox","firefox","http://mc.yiraft.tk",NULL);			//用于linux
+	//execl("start","start","iexplore",NULL);													//用于windows
 	}
 
 
@@ -73,8 +74,8 @@ void gsign_start_game(GtkWidget *button,gpointer player_buffer)
 	chdir("./bin");
 	g_print("%s\n",getcwd(NULL,0));
 	
-	//init_game_linux(player);                           //用于linux
-	init_game_ms(player);                                 //用于windows
+	init_game_linux(player);                           //用于linux
+	//init_game_ms(player);                                 //用于windows
 	}
 
 void win_erro(GtkWidget *window)
@@ -89,17 +90,16 @@ void win_erro(GtkWidget *window)
 
 int find_game_linux(GtkWidget *window)
 {
-	char path[200]="";
-	strcat(path,getenv("HOME"));
-	strcat(path,"/.minecraft");
-	if(chdir(path) != 0 )
+	gchar gamefile[200] = "" ;
+	
+	strcat(gamefile,getenv("HOME"));
+	strcat(gamefile,"/.minecraft/bin/minecraft.jar");
+	
+	if(access(gamefile,F_OK))
 	{
 		win_erro(window);
 		return -1;
-			}
-	else
-			g_print("%s\n",getcwd(NULL,0));
-	
+		}
 	return 0;
 	}
 
@@ -174,15 +174,14 @@ void win_main(GtkWidget *window)
 	}
 	
 int main(int argc, char **argv)
-{		
-	GtkWidget *window;
-	
+{	
 	gtk_init(&argc,&argv);
+	
+	GtkWidget *window;
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	
-	//if(find_game_linux(window) != 0 )                          //用于linux
-	if(find_game_ms(window) != 0 )                                //用于windows
-	return 0;
+	if(find_game_linux(window))
+	return 0;													//找不到游戏执行的动作。
 
 	win_main(window);
 	gtk_main();
