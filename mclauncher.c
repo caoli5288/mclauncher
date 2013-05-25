@@ -20,60 +20,52 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "conf.h"
 
-void conf_player_load(gchar *player)
+void init_game()
 {
-	FILE *pconf;
-	pconf = fopen(".minecraft/player.conf","a+");
-	fgets(player,80,pconf);
-	fclose(pconf);
-}
-
-void conf_player_save(gchar *player)
-{
-	FILE *pconf;
-	pconf = fopen(".minecraft/player.conf","w+");	
-	fputs(player,pconf);
-	fclose(pconf);
-	g_print("save player.conf complete\n");
-	}
-
-void init_game(gchar *player)
-{
-	char com[200] = "java -Xms512m -Xmx1g -cp ";
-	strcat(com,"jinput.jar:lwjgl.jar:lwjgl_util.jar:minecraft.jar ");
-	strcat(com,"-Djava.library.path=\"./natives\" ");
-	strcat(com,"net.minecraft.client.Minecraft ");
-	strcat(com,player);
+	gchar argv[200] = "java ";
+	strcat(argv,conf[2]);
+	strcat(argv," ");
+	strcat(argv,conf[3]);
+	strcat(argv," -cp ");
+	strcat(argv,"jinput.jar:lwjgl.jar:lwjgl_util.jar:minecraft.jar ");
+	strcat(argv,"-Djava.library.path=\"./natives\" ");
+	strcat(argv,"net.minecraft.client.Minecraft ");
+	strcat(argv,conf[1]);
 	
-	g_print("init command:%s\n",com);
-	
+	conf_envp_set();
 	chdir(".minecraft/bin");
-	g_print("dir now:%s\n",getcwd(NULL,0));
 	
-	execlp ("bash", "bash", "-c", com, NULL);
+	//system(argv);
+	gtk_main_quit();
 	}
 	
-void gsign_open_home(GtkWidget *button,gpointer userdata)
+void win_conf()
 {
-	g_print("open home page\n");
-	execlp("firefox","firefox","http://mc.yiraft.tk",NULL);
+	GtkWidget *frame;
+	GtkWidget *window;
+	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(window),"设置窗口");
+	gtk_window_set_default_size(GTK_WINDOW(window),400,150);
+	//gtk_window_set_resizable(GTK_WINDOW(window),FALSE);
+	//gtk_widget_set_size_request
+	gtk_window_set_position(GTK_WINDOW(window),GTK_WIN_POS_CENTER);
+	gtk_container_set_border_width(GTK_CONTAINER(window),5);
+	gtk_window_set_keep_above(GTK_WINDOW(window),TRUE);
+	
+	frame = gtk_frame_new("内存设置");
+	gtk_container_add(GTK_CONTAINER(window),GTK_WIDGET(frame));
+	
+	gtk_widget_show_all(window);
 	}
 
-
-void gsign_start_game(GtkWidget *button,gpointer player_buffer)
-{	
-	gchar player[80] = "";
-	
-	strcat(player,gtk_entry_buffer_get_text(player_buffer));
-	conf_player_save(player);
-	
-	init_game(player); 
-	}
-
-void win_erro(GtkWidget *window)
+void win_erro()
 {
-	GtkWidget *dialog;	
+	GtkWidget *dialog;
+	GtkWidget *window;
+	
+	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
 	"当前用户家目录下没有.minecraft文件夹\n\n如果您还没有下载游戏,可以到这里下载\n\nhttp://date.yiraft.tk/");
 	gtk_window_set_title(GTK_WINDOW(dialog), "找不到游戏");
@@ -81,35 +73,35 @@ void win_erro(GtkWidget *window)
 	gtk_widget_destroy(dialog);
 	}
 
-int find_game(gchar *gamepath)
+void gsign_start_game(GtkWidget *button,void **pack)
+{	
+	gtk_widget_hide_all(pack[0]);
+	gchar player[40] = "";
+	g_print("之前\n");
+	strcat(player,gtk_entry_buffer_get_text(pack[1]));
+	g_print("之前\n");
+	conf[1] = player;
+	conf_player_save();	
+	init_game(); 
+	}
+	
+void gsign_conf_set(GtkWidget *button,gpointer userdata)
 {
-	gchar gamefile[200] = "" ;
-	
-	g_print("exec at:%s\n",getcwd(NULL,0));
-	g_print("now check game file\n");
-	g_print("check game file at:%s\n",gamepath);
-	
-	strcat(gamefile,gamepath);
-	strcat(gamefile,"/.minecraft/bin/minecraft.jar");
-	
-	if(access(gamefile,F_OK))
-		{
-			return -1;
-			g_print("check game file failed\n");
-			}
-	g_print("check game file succes\n");
-	return 0;
+	win_conf();
 	}
 
-void win_main(GtkWidget *window)
+void win_main()
 {
+	GtkWidget *window;
 	GtkWidget *vbox1,*vbox2,*hbox1,*hbox2;
 	GtkWidget *label1;
 	GtkWidget *image;
 	GtkWidget *entryplayer;
 	GtkWidget *button1,*button2;
 	GtkEntryBuffer *player_buffer;
-	gchar player[80] = "";
+	
+	gchar player[40] = "";
+	strcat(player,conf[1]);
 	
 	g_print("dir when init win_main:%s\n",getcwd(NULL,0));
 	
@@ -118,7 +110,7 @@ void win_main(GtkWidget *window)
 	gtk_window_set_default_size(GTK_WINDOW(window),320,0);
 	gtk_window_set_resizable(GTK_WINDOW(window),FALSE);
 	gtk_window_set_position(GTK_WINDOW(window),GTK_WIN_POS_CENTER);
-	gtk_container_set_border_width(GTK_CONTAINER(window),10);
+	gtk_container_set_border_width(GTK_CONTAINER(window),5);
 	g_signal_connect(G_OBJECT(window),"delete_event",G_CALLBACK(gtk_main_quit),NULL);
 	
 	vbox1 = gtk_vbox_new(FALSE,2);
@@ -136,72 +128,48 @@ void win_main(GtkWidget *window)
 	hbox1 = gtk_hbox_new(FALSE,1);
 	gtk_box_pack_start(GTK_BOX(vbox2),hbox1,FALSE,FALSE,0);	
 	
-	conf_player_load(player);									//读取玩家设置
-		
-	g_print("load player:%s\n",player);
-	
 	player_buffer = gtk_entry_buffer_new(player,-1);
 	
-	entryplayer = gtk_entry_new_with_buffer(GTK_ENTRY_BUFFER(player_buffer));
+	entryplayer = gtk_entry_new_with_buffer(player_buffer);
 	gtk_entry_set_alignment (GTK_ENTRY (entryplayer), 0.5);
 	gtk_box_pack_start(GTK_BOX(hbox1),entryplayer,TRUE,TRUE,0);
 		
 	hbox2 = gtk_hbox_new(TRUE,2);
-	gtk_box_pack_end(GTK_BOX(vbox2),hbox2,FALSE,FALSE,10);
+	gtk_box_pack_end(GTK_BOX(vbox2),hbox2,FALSE,FALSE,5);
 	
-	button1 = gtk_button_new_with_label("打开主页");
+	button1 = gtk_button_new_with_label("选项设置");
 	button2 = gtk_button_new_with_label("启动游戏");
 	
-	g_signal_connect(G_OBJECT(button1),"clicked",G_CALLBACK(gsign_open_home),NULL);
-	g_signal_connect(G_OBJECT(button2),"clicked",G_CALLBACK(gsign_start_game),player_buffer);
+	gpointer pack[] = {window,player_buffer};
+	
+	g_signal_connect(G_OBJECT(button1),"clicked",G_CALLBACK(gsign_conf_set),NULL);
+	g_signal_connect(G_OBJECT(button2),"clicked",G_CALLBACK(gsign_start_game),pack);
 	
 	gtk_box_pack_start(GTK_BOX(hbox2),button1,FALSE,TRUE,0);
 	gtk_box_pack_start(GTK_BOX(hbox2),button2,FALSE,TRUE,0);
 	
-	gtk_widget_show_all(window);	
-	}
-	
-void conf_env_set(gchar *gamepath)
-{
-	gchar env[200] = "HOME=" ;
-	
-	g_print("now set HOME\n");
-	g_print("set HOME at:%s\n",gamepath);
-	
-	strcat(env,gamepath);
-	if(putenv(env))
-		g_print("set HOME failed\n");
-	else
-		g_print("set HOME succes\n");
-	g_print("now HOME is:%s\n",getenv("HOME"));
-	
-	chdir(getenv("HOME"));
+	gtk_widget_show_all(window);
 	}
 	
 int main(int argc, char **argv)
 {	
+	conf[0] = getenv("HOME");
+	conf[1] = "";
+	conf[2] = "-Xms512m";
+	conf[3] = "-Xmx1024m";
+	
 	gtk_init(&argc,&argv);
 	
-	GtkWidget *window;
-	gchar gamepath[200] = "";
-	
-	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	
-	//XXXXXXXXX												//从配置中读取默认目录
-	strcat(gamepath,getenv("HOME"));			//读配置做好后注释掉
-	
-	//if(find_game(window,gamepath))				//从目录中查找游戏文件
-	//win_def_dir_set(window);							//配置读写完成后启用，循环检查。
-
-	if(find_game(gamepath))				//从目录中查找游戏文件
+	if(conf_game_find())
 	{
-		win_erro(window);
+		win_erro();
 		return 0;
 		}
 	
-	conf_env_set(gamepath);							//配置游戏所需环境变量
+	chdir(conf[0]);
+	conf_player_load();
 	
-	win_main(window);
+	win_main();
 	gtk_main();
 	
 	return 0;
