@@ -73,12 +73,12 @@ void win_erro()
 	gtk_widget_destroy(dialog);
 	}
 
-void gsign_start_game(GtkWidget *button,gpointer *pack)
+void gsign_start_game(GtkWidget *button,void *pack[])
 {	
-	gtk_widget_hide_all(pack[0]);
+	gtk_widget_hide_all((GtkWidget*)pack[0]);
 	gchar player[40] = "";
 	g_print("之前\n");
-	strcat(player,gtk_entry_buffer_get_text(pack[1]));
+	strcat(player,gtk_entry_buffer_get_text((GtkEntryBuffer*)pack[1]));
 	g_print("之前\n");
 	conf[1] = player;
 	conf_player_save();	
@@ -140,7 +140,7 @@ void win_main()
 	button1 = gtk_button_new_with_label("选项设置");
 	button2 = gtk_button_new_with_label("启动游戏");
 	
-	gpointer pack[] = {window,player_buffer};
+	void *pack[] = {window,player_buffer};
 	
 	g_signal_connect(G_OBJECT(button1),"clicked",G_CALLBACK(gsign_conf_set),NULL);
 	g_signal_connect(G_OBJECT(button2),"clicked",G_CALLBACK(gsign_start_game),pack);
@@ -148,7 +148,7 @@ void win_main()
 	gtk_box_pack_start(GTK_BOX(hbox2),button1,FALSE,TRUE,0);
 	gtk_box_pack_start(GTK_BOX(hbox2),button2,FALSE,TRUE,0);
 	
-	gtk_widget_show_all(window);
+	gtk_widget_show_all(pack[0]);
 	}
 	
 int main(int argc, char **argv)
