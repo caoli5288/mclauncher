@@ -140,7 +140,7 @@ void win_main()
 	button1 = gtk_button_new_with_label("选项设置");
 	button2 = gtk_button_new_with_label("启动游戏");
 	
-	void *pack[] = {window,player_buffer};
+	void *pack[] = {&window,&player_buffer};
 	
 	g_signal_connect(G_OBJECT(button1),"clicked",G_CALLBACK(gsign_conf_set),NULL);
 	g_signal_connect(G_OBJECT(button2),"clicked",G_CALLBACK(gsign_start_game),pack);
@@ -148,7 +148,7 @@ void win_main()
 	gtk_box_pack_start(GTK_BOX(hbox2),button1,FALSE,TRUE,0);
 	gtk_box_pack_start(GTK_BOX(hbox2),button2,FALSE,TRUE,0);
 	
-	gtk_widget_show_all(pack[0]);
+	gtk_widget_show_all(window);
 	}
 	
 int main(int argc, char **argv)
