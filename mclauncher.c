@@ -73,7 +73,7 @@ void win_erro()
 	gtk_widget_destroy(dialog);
 	}
 
-void gsign_start_game(GtkWidget *button,void **pack)
+void gsign_start_game(GtkWidget *button,gpointer *pack)
 {	
 	gtk_widget_hide_all(pack[0]);
 	gchar player[40] = "";
