@@ -15,11 +15,7 @@
  * MA 02110-1301, USA.
  * 
  */
-
-#include <gtk/gtk.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+ 
 #include "conf.h"
 
 void init_game()
@@ -52,12 +48,12 @@ void win_conf()
 	//gtk_widget_set_size_request
 	gtk_window_set_position(GTK_WINDOW(window),GTK_WIN_POS_CENTER);
 	gtk_container_set_border_width(GTK_CONTAINER(window),5);
-	gtk_window_set_keep_above(GTK_WINDOW(window),TRUE);
 	
 	frame = gtk_frame_new("内存设置");
 	gtk_container_add(GTK_CONTAINER(window),GTK_WIDGET(frame));
 	
 	gtk_widget_show_all(window);
+	gtk_main_iteration();
 	}
 
 void win_erro()
@@ -75,11 +71,12 @@ void win_erro()
 
 void gsign_start_game(GtkWidget *button,void *pack[])
 {	
-	gtk_widget_hide_all((GtkWidget*)pack[0]);
+	gtk_widget_hide_all((pack[0]));
+	g_print((gchar*)pack[2]);
 	gchar player[40] = "";
-	g_print("之前\n");
+	g_print("检测\n");
 	strcat(player,gtk_entry_buffer_get_text((GtkEntryBuffer*)pack[1]));
-	g_print("之前\n");
+	g_print("检测\n");
 	conf[1] = player;
 	conf_player_save();	
 	init_game(); 
@@ -89,7 +86,7 @@ void gsign_conf_set(GtkWidget *button,gpointer userdata)
 {
 	win_conf();
 	}
-
+	
 void win_main()
 {
 	GtkWidget *window;
@@ -140,7 +137,10 @@ void win_main()
 	button1 = gtk_button_new_with_label("选项设置");
 	button2 = gtk_button_new_with_label("启动游戏");
 	
-	void *pack[] = {&window,&player_buffer};
+	gchar test[] = "测试\n";
+	g_print(test);
+	void *pack[] = {window,player_buffer,test};
+	g_print(pack[2]);
 	
 	g_signal_connect(G_OBJECT(button1),"clicked",G_CALLBACK(gsign_conf_set),NULL);
 	g_signal_connect(G_OBJECT(button2),"clicked",G_CALLBACK(gsign_start_game),pack);

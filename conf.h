@@ -1,3 +1,8 @@
+#include <unistd.h>
+#include <gtk/gtk.h>
+#include <stdlib.h>
+#include <string.h>
+
 gchar *conf[4];
 
 void conf_player_load()
